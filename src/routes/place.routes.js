@@ -1,11 +1,12 @@
 import {Router} from 'express'
-import {getPlaceByUserId} from '../controllers/place.controller.js'
-import { authRequired } from '../middlewares/validateToken.js'
-import {validateSchema} from '../middlewares/validator.middleware.js'
-import {registerSchema, loginSchema} from '../schemas/auth.schema.js'
+import { getPlaceByUserId, getPlaceById } from '../controllers/place.controller.js'
+
 
 const router = Router()
 
-router.get('/PlaceByUserId/:user_id', getPlaceByUserId)
+router
+    .get('/PlaceByUserId/:user_id', getPlaceByUserId)
+    .get('/PlaceById/:place_id', getPlaceById)
+    
 
 export default router
