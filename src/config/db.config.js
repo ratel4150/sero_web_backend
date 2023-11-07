@@ -1,14 +1,18 @@
-import {Sequelize} from "sequelize";
+// import dbManager from '../config/dbManager.config.js'
 
-const sequelize = new Sequelize ('db_prueba','sa','Erpp123.',{
-    host:'172.25.3.114',
-    dialect:'mssql',
-    dialectOptions: {
-      options: {
-        encrypt: false,
-        trustServerCertificate: true,
-      },
-    },
-  })
+// const connectDB = async (place_id) => {
+//   if (place_id in dbManager) {
+//     try {
+//       await dbManager[place_id].authenticate();
+//       console.log('>>> DB is connected for place_id:', place_id);
+//       return dbManager[place_id];
+//     } catch (error) {
+//       console.log('Error connecting to the database:', error);
+//       throw error;
+//     }
+//   } else {
+//     throw new Error('Invalid place_id');
+//   }
+// };
 
-export default sequelize
+// export default connectDB;
