@@ -2,7 +2,8 @@ import { Sequelize } from 'sequelize';
 
 const dbManager = {
   db_prueba: new Sequelize('db_prueba', 'sa', 'Erpp123.', {
-    host: '172.25.3.114',
+    host: '201.163.165.20',
+    /* host: '172.25.3.114', esta es privadfa */
     dialect: 'mssql',
     dialectOptions: {
       options: {
