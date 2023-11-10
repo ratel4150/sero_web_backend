@@ -5,24 +5,18 @@ export const getAccountHistoryByCount = async (req, res) => {
   const sequelize = getDatabaseInstance(place_id);
 
   try {
-    const account = req.params.account; // Obtén el valor del parámetro desde req.params
-    const [accountHistory, metadata] = await sequelize.query(
-      'execute sp_get_account_history @account=:account', // Usa el nombre del parámetro
-      { replacements: { account } } // Pasa los parámetros aquí
-    );
-    
+    const [account, metadata] = await sequelize.query(`execute sp_get_account_history '${req.params.account}'`)
     // Verifica si accountHistory es undefined o tiene algún valor
-    if (!accountHistory) {
-      return res.status(404).json({ message: 'account not found' });
-    }
-     
-   /*  res.json(accountHistory); */
+    if(!account[0]) return res.status(400).json({
+      message: "not found account"
+    })      
+  
+    res.json(account)
+
   } catch (error) {
-    console.log(error);
-    // Maneja el error de la base de datos aquí, puedes personalizar según tus necesidades.
-    return res.status(500).json({ message: 'Internal Server Error' });
-  }
+    console.log(error)
+    return res.status(404).json({message: 'account not found'})
+  }  
 };
 
-// Llamada de prueba
-getAccountHistoryByCount({ params: { account: "00000007-00000007" } });
+
