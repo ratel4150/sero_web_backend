@@ -15,7 +15,7 @@ export const getAccountHistoryByCount = async (req, res) => {
     if (!accountHistory) {
       return res.status(404).json({ message: 'account not found' });
     }
-     console.log(accountHistory);
+     
    /*  res.json(accountHistory); */
   } catch (error) {
     console.log(error);
