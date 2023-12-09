@@ -1,35 +1,46 @@
 import { getDatabaseInstance } from "../config/dbManager.config.js";
-import Joi from 'joi';
+import Joi from "joi";
 export const getPlaceServiceProcessByUserId = async (req, res) => {
-  
-  const place_id = 0 
-  const sequelize = getDatabaseInstance(place_id) 
+  const place_id = 0;
+  const sequelize = getDatabaseInstance(place_id);
 
-    try {
-      const [processFound, metadata] = await sequelize.query(`execute sp_get_place_service_process_by_user_id '${req.params.user_id}'`)
+  try {
+    const [processFound, metadata] = await sequelize.query(
+      `execute sp_get_place_service_process_by_user_id '${req.params.user_id}'`
+    );
 
-      if(!processFound[0]) return res.status(400).json({
-        message: "not found process"
-      })      
-    
-      res.json(processFound)
+    if (!processFound[0])
+      return res.status(400).json({
+        message: "not found process",
+      });
 
-    } catch (error) {
-      console.log(error)
-      return res.status(404).json({message: 'process not found'})
-    }  
+    res.json(processFound);
+  } catch (error) {
+    console.log(error);
+    return res.status(404).json({ message: "process not found" });
   }
+};
 
-  // Define the validation schema for the request body data
-const createProcesoSchema = Joi.object({
-  nombre: Joi.string().required(),
-  imagen: Joi.string(),
-  activo: Joi.boolean().required(),
-  procedimiento_almacenado_gestion: Joi.string(),
-  procedimiento_almacenado_gestion_grafico: Joi.string(),
-  tabla_gestion: Joi.string(),
-  url_aplicacion_movil: Joi.string(),
-});
+/**
+ * Validation schema for creating a process.
+ * @typedef {Object} CreateProcessSchema
+ * @property {string} name - The name of the process. Required.
+ * @property {string} image - The image URL of the process.
+ * @property {boolean} active - Indicates whether the process is active. Required.
+ * @property {string} stored_procedure_management - The stored procedure for management.
+ * @property {string} stored_procedure_management_graphic - The stored procedure for graphical management.
+ * @property {string} management_table- The management table.
+ * @property {string} mobile_application_url - The mobile application URL.
+ */
+const createProcessSchema = Joi.object({
+  name: Joi.string().required(),
+  image: Joi.string(),
+  active: Joi.boolean().required(),
+  stored_procedure_management: Joi.string(),
+  stored_procedure_management_graphic: Joi.string(),
+  management_table: Joi.string(),
+  mobile_application_url: Joi.string(),
+  });
 
 /**
  * Retrieves all process categories from the database.
@@ -54,7 +65,7 @@ export const getAllProcesses = async (req, res) => {
   } catch (error) {
     // Log the error and send a 500 status with a JSON response
     console.error(error);
-    res.status(500).json({ message: 'Failed to retrieve process categories' });
+    res.status(500).json({ message: "Failed to retrieve process categories" });
   }
 };
 
@@ -74,23 +85,26 @@ export const getProcessById = async (req, res) => {
     const sequelize = getDatabaseInstance(place_id);
 
     // Execute query to get a specific process category by ID
-    const [process, metadata] = await sequelize.query(`
+    const [process, metadata] = await sequelize.query(
+      `
       SELECT * FROM dbo.proceso WHERE id_proceso = :id;
-    `, {
-      replacements: { id: processId },
-    });
+    `,
+      {
+        replacements: { id: processId },
+      }
+    );
 
     // Check if the process was found
     if (process && process.length > 0) {
       // Send the retrieved process as a JSON response
       res.json(process[0]);
     } else {
-      res.status(404).json({ message: 'Process category not found' });
+      res.status(404).json({ message: "Process category not found" });
     }
   } catch (error) {
     // Log the error and send a 500 status with a JSON response
     console.error(error);
-    res.status(500).json({ message: 'Failed to retrieve process category' });
+    res.status(500).json({ message: "Failed to retrieve process category" });
   }
 };
 
@@ -111,7 +125,8 @@ export const updateProcess = async (req, res) => {
     const sequelize = getDatabaseInstance(place_id);
 
     // Execute query to update a specific process category by ID
-    const [updatedProcess, metadata] = await sequelize.query(`
+    const [updatedProcess, metadata] = await sequelize.query(
+      `
       UPDATE dbo.proceso
       SET
         nombre = :nombre,
@@ -122,21 +137,23 @@ export const updateProcess = async (req, res) => {
         tabla_gestion = :tabla_gestion,
         url_aplicacion_movil = :url_aplicacion_movil
       WHERE id_proceso = :id;
-    `, {
-      replacements: { id: processId, ...updatedProcessData },
-    });
+    `,
+      {
+        replacements: { id: processId, ...updatedProcessData },
+      }
+    );
 
     // Check if the process was updated successfully
     if (updatedProcess && updatedProcess.length > 0) {
       // Send a success response or additional data as needed
-      res.json({ message: 'Process category updated successfully' });
+      res.json({ message: "Process category updated successfully" });
     } else {
-      res.status(404).json({ message: 'Process category not found' });
+      res.status(404).json({ message: "Process category not found" });
     }
   } catch (error) {
     // Log the error and send a 500 status with a JSON response
     console.error(error);
-    res.status(500).json({ message: 'Failed to update process category' });
+    res.status(500).json({ message: "Failed to update process category" });
   }
 };
 
@@ -156,23 +173,26 @@ export const deleteProcess = async (req, res) => {
     const sequelize = getDatabaseInstance(place_id);
 
     // Execute query to delete a specific process category by ID
-    const [deletedProcess, metadata] = await sequelize.query(`
+    const [deletedProcess, metadata] = await sequelize.query(
+      `
       DELETE FROM dbo.proceso WHERE id_proceso = :id;
-    `, {
-      replacements: { id: processId },
-    });
+    `,
+      {
+        replacements: { id: processId },
+      }
+    );
 
     // Check if the process was deleted successfully
     if (deletedProcess && deletedProcess.length > 0) {
       // Send a success response or additional data as needed
-      res.json({ message: 'Process category deleted successfully' });
+      res.json({ message: "Process category deleted successfully" });
     } else {
-      res.status(404).json({ message: 'Process category not found' });
+      res.status(404).json({ message: "Process category not found" });
     }
   } catch (error) {
     // Log the error and send a 500 status with a JSON response
     console.error(error);
-    res.status(500).json({ message: 'Failed to delete process category' });
+    res.status(500).json({ message: "Failed to delete process category" });
   }
 };
 
@@ -187,11 +207,13 @@ export const deleteProcess = async (req, res) => {
 export const createProcess = async (req, res) => {
   try {
     // Validate the request body data with the schema
-    const { error, value } = createProcesoSchema.validate(req.body);
+    const { error, value } = createProcessSchema.validate(req.body);
 
     if (error) {
       // If there are validation errors, respond with a 400 error and the error details
-      return res.status(400).json({ message: 'Invalid request body', error: error.details });
+      return res
+        .status(400)
+        .json({ message: "Invalid request body", error: error.details });
     }
 
     const processData = extractProcessData(value);
@@ -199,14 +221,13 @@ export const createProcess = async (req, res) => {
     await insertProcessToDatabase(processData);
 
     // Send a success response or additional data as needed
-    res.json({ message: 'Process category created successfully' });
+    res.json({ message: "Process category created successfully" });
   } catch (error) {
     // Log the error and send a 500 status with a JSON response
     console.error(error);
-    res.status(500).json({ message: 'Failed to create process category' });
+    res.status(500).json({ message: "Failed to create process category" });
   }
 };
-
 
 /**
  * Inserts process data into the database.
@@ -220,7 +241,8 @@ export const insertProcessToDatabase = async (processData) => {
   const sequelize = getDatabaseInstance(place_id);
 
   // Execute stored procedure or perform actions to create a new process category
-  const [processCreated, metadata] = await sequelize.query(`
+  const [processCreated, metadata] = await sequelize.query(
+    `
     INSERT INTO dbo.proceso (
       nombre,
       imagen,
@@ -239,14 +261,16 @@ export const insertProcessToDatabase = async (processData) => {
       :tabla_gestion,
       :url_aplicacion_movil
     );
-  `, {
-    replacements: processData,
-  });
+  `,
+    {
+      replacements: processData,
+    }
+  );
 
   // Check if the process was created successfully
   if (!(processCreated && processCreated.length > 0)) {
     // If the process creation was not successful, throw an error
-    throw new Error('Failed to create process category');
+    throw new Error("Failed to create process category");
   }
 };
 
@@ -260,28 +284,26 @@ export const insertProcessToDatabase = async (processData) => {
  */
 export const extractProcessData = (requestBody) => {
   const {
-    nombre,
-    imagen,
-    activo,
-    procedimiento_almacenado_gestion,
-    procedimiento_almacenado_gestion_grafico,
-    tabla_gestion,
-    url_aplicacion_movil,
+    name,
+    image,
+    active,
+    stored_procedure_management,
+    stored_procedure_management_graphic,
+    management_table,
+    mobile_application_url,
   } = requestBody;
 
-  if (!nombre || !activo) {
-    throw new Error('Invalid request body. Missing required properties.');
+  if (!name || !image || !active || !stored_procedure_management || !stored_procedure_management_graphic || !management_table || !mobile_application_url) {
+    throw new Error("Invalid request body. Missing required properties.");
   }
 
   return {
-    nombre,
-    imagen,
-    activo,
-    procedimiento_almacenado_gestion,
-    procedimiento_almacenado_gestion_grafico,
-    tabla_gestion,
-    url_aplicacion_movil,
+    name,
+    image,
+    active,
+    stored_procedure_management,
+    stored_procedure_management_graphic,
+    management_table,
+    mobile_application_url,
   };
 };
-
-

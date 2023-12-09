@@ -1,38 +1,55 @@
 import { getDatabaseInstance } from "../config/dbManager.config.js";
+/**
+ * Joi schema for creating a service.
+ * @typedef {Object} CreateServiceSchema
+ * @property {string} name - The name of the service. Required.
+ * @property {string} image - The image URL of the service.
+ * @property {boolean} active - Indicates whether the service is active. Required.
+ * @property {number} order - The order of the service (integer).
+ * @property {string} mobile_app_icon - The icon URL for the mobile app.
+ */
+import Joi from "joi";
 
-import Joi from 'joi';
-
-// Define the Joi schema for validating the request body
+/**
+ * Define the validation schema for creating a service.
+ * @type {Joi.ObjectSchema<CreateServiceSchema>}
+ */
 const createServiceSchema = Joi.object({
-  nombre: Joi.string().required(),
-  imagen: Joi.string(),
-  activo: Joi.boolean().required(),
-  orden: Joi.number().integer(),
-  icono_app_movil: Joi.string(),
+  name: Joi.string().required(),
+  image: Joi.string(),
+  active: Joi.boolean().required(),
+  order: Joi.number().integer(),
+  mobile_app_icon: Joi.string(),
 });
 
+/* name,
+    image,
+    active,
+    order,
+    mobile_app_icon, */
+
 export const getPlaceServiceByUserId = async (req, res) => {
+  const place_id = 0;
+  const sequelize = getDatabaseInstance(place_id);
 
-  const place_id = 0 
-  const sequelize = getDatabaseInstance(place_id) 
-  
-    try {
-      const [serviceFound, metadata] = await sequelize.query(`execute sp_get_place_service_by_user_id '${req.params.user_id}','${req.params.place_id}'`)
+  try {
+    const [serviceFound, metadata] = await sequelize.query(
+      `execute sp_get_place_service_by_user_id '${req.params.user_id}','${req.params.place_id}'`
+    );
 
-      if(!serviceFound[0]) return res.status(400).json({
-        message: "not found service"
-      })      
-    
-      res.json(serviceFound)
+    if (!serviceFound[0])
+      return res.status(400).json({
+        message: "not found service",
+      });
 
-    } catch (error) {
-      console.log(error)
-      return res.status(404).json({message: 'service not found'})
-    }  
+    res.json(serviceFound);
+  } catch (error) {
+    console.log(error);
+    return res.status(404).json({ message: "service not found" });
   }
+};
 
-
-  /**
+/**
  * Service Service: Handles business logic for services.
  */
 
@@ -55,7 +72,7 @@ export const getAllServices = async () => {
 
     return services;
   } catch (error) {
-    throw new Error('Failed to retrieve services');
+    throw new Error("Failed to retrieve services");
   }
 };
 
@@ -72,19 +89,21 @@ export const getServiceById = async (serviceId) => {
     const sequelize = getDatabaseInstance(place_id);
 
     // Execute query to get a specific service by ID
-    const [service, metadata] = await sequelize.query(`
+    const [service, metadata] = await sequelize.query(
+      `
       SELECT [id_servicio], [nombre], [imagen], [activo], [orden], [fecha_ingreso], [icono_app_movil]
       FROM [sero_central].[dbo].[servicio] WHERE [id_servicio] = :id;
-    `, {
-      replacements: { id: serviceId },
-    });
+    `,
+      {
+        replacements: { id: serviceId },
+      }
+    );
 
     return service && service.length > 0 ? service[0] : null;
   } catch (error) {
-    throw new Error('Failed to retrieve service');
+    throw new Error("Failed to retrieve service");
   }
 };
-
 
 /**
  * Updates a specific service by its ID in the database.
@@ -100,23 +119,26 @@ export const updateService = async (serviceId, updatedServiceData) => {
     const sequelize = getDatabaseInstance(place_id);
 
     // Execute query to update a specific service by ID
-    const [updatedService, metadata] = await sequelize.query(`
+    const [updatedService, metadata] = await sequelize.query(
+      `
       UPDATE [sero_central].[dbo].[servicio]
       SET [nombre] = :name, [imagen] = :image, [activo] = :active, [orden] = :order, [fecha_ingreso] = :date, [icono_app_movil] = :icon
       WHERE [id_servicio] = :id;
-    `, {
-      replacements: { id: serviceId, ...updatedServiceData },
-    });
+    `,
+      {
+        replacements: { id: serviceId, ...updatedServiceData },
+      }
+    );
 
     if (!(updatedService && updatedService.length > 0)) {
-      throw new Error('Service not found');
+      throw new Error("Service not found");
     }
   } catch (error) {
-    throw new Error('Failed to update service');
+    throw new Error("Failed to update service");
   }
 };
 /*
-**
+ **
  * Deletes a specific service by its ID from the database.
  *
  * @param {number} serviceId - The ID of the service to delete.
@@ -129,17 +151,20 @@ export const deleteService = async (serviceId) => {
     const sequelize = getDatabaseInstance(place_id);
 
     // Execute query to delete a specific service by ID
-    const [deletedService, metadata] = await sequelize.query(`
+    const [deletedService, metadata] = await sequelize.query(
+      `
       DELETE FROM [sero_central].[dbo].[servicio] WHERE [id_servicio] = :id;
-    `, {
-      replacements: { id: serviceId },
-    });
+    `,
+      {
+        replacements: { id: serviceId },
+      }
+    );
 
     if (!(deletedService && deletedService.length > 0)) {
-      throw new Error('Service not found');
+      throw new Error("Service not found");
     }
   } catch (error) {
-    throw new Error('Failed to delete service');
+    throw new Error("Failed to delete service");
   }
 };
 /**
@@ -157,7 +182,9 @@ export const createService = async (req, res) => {
 
     if (error) {
       // If there are validation errors, respond with a 400 error and the error details
-      return res.status(400).json({ message: 'Invalid request body', error: error.details });
+      return res
+        .status(400)
+        .json({ message: "Invalid request body", error: error.details });
     }
 
     const serviceData = extractServiceData(value);
@@ -165,11 +192,11 @@ export const createService = async (req, res) => {
     await insertServiceToDatabase(serviceData);
 
     // Send a success response or additional data as needed
-    res.json({ message: 'Service created successfully' });
+    res.json({ message: "Service created successfully" });
   } catch (error) {
     // Log the error and send a 500 status with a JSON response
     console.error(error);
-    res.status(500).json({ message: 'Failed to create service' });
+    res.status(500).json({ message: "Failed to create service" });
   }
 };
 
@@ -179,27 +206,36 @@ const insertServiceToDatabase = async (serviceData) => {
   const sequelize = getDatabaseInstance(place_id);
 
   // Execute stored procedure or perform actions to create a new service
-  const [serviceCreated, metadata] = await sequelize.query(`
+  const [serviceCreated, metadata] = await sequelize.query(
+    `
     INSERT INTO [sero_central].[dbo].[servicio] (nombre, imagen, activo, orden, icono_app_movil)
     VALUES (:nombre, :imagen, :activo, :orden, :icono_app_movil);
-  `, {
-    replacements: serviceData,
-  });
+  `,
+    {
+      replacements: serviceData,
+    }
+  );
 
   // Check if the service was created successfully
   if (!(serviceCreated && serviceCreated.length > 0)) {
     // If the service creation was not successful, throw an error
-    throw new Error('Failed to create service');
+    throw new Error("Failed to create service");
   }
 };
 
 // Define the function to extract service data from the request body
 const extractServiceData = (requestBody) => {
-  const { nombre, imagen, activo, orden, icono_app_movil } = requestBody;
+  const { name, image, active, order, mobile_app_icon } = requestBody;
 
-  if (!nombre || !activo) {
-    throw new Error('Invalid request body. Missing required properties.');
+  if (!name || !image || !active || !order || !mobile_app_icon) {
+    throw new Error("Invalid request body. Missing required properties.");
   }
 
-  return { nombre, imagen, activo, orden, icono_app_movil };
+  return {
+    name,
+    image,
+    active,
+    order,
+    mobile_app_icon,
+  };
 };
