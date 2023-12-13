@@ -20,6 +20,8 @@ router.delete('/tasks/:id', taskController.deleteTask);
 
 // Ruta para crear una nueva tarea
 
-router.post('/tasks', taskController.createTask);
+router.post('/task', taskController.createTask);
+router.post('/task/check-name', taskController.isTaskWithNameExists);
+
 
 export default router

@@ -1,12 +1,16 @@
 // /controllers/task.controller.js
 import { getDatabaseInstance } from "../config/dbManager.config.js";
 import Joi from 'joi';
+import { login } from "./auth.controller.js";
 
 // Define el esquema de validación para los datos del cuerpo de la solicitud
 const createTaskSchema = Joi.object({
-  name: Joi.string().required(),
-  active: Joi.boolean().required(),
-  process_id: Joi.number().integer().required(),
+  
+  id:Joi.number(),
+  id_tarea: Joi.number(),
+  nombre: Joi.string().required(),
+  activo: Joi.boolean().required(),
+  id_proceso: Joi.number().integer().required(),
 });
 
 /**
@@ -19,13 +23,15 @@ const createTaskSchema = Joi.object({
  */
 export const getAllTasks = async (req, res) => {
     try {
-      const place_id = 0;
+      const place_id = 1;
       const sequelize = getDatabaseInstance(place_id);
   
       // Execute query to get all task categories
       const [tasks, metadata] = await sequelize.query(`
-        SELECT * FROM dbo.cat_tarea;
+        SELECT * FROM dbo.cat_tarea_arturo_prueba;
       `);
+
+    
   
       // Send the retrieved tasks as a JSON response
       res.json(tasks);
@@ -48,12 +54,12 @@ export const getAllTasks = async (req, res) => {
     const taskId = req.params.id;
   
     try {
-      const place_id = 0;
+      const place_id = 1;
       const sequelize = getDatabaseInstance(place_id);
   
       // Execute query to get a specific task category by ID
       const [task, metadata] = await sequelize.query(`
-        SELECT * FROM dbo.cat_tarea WHERE id = :id;
+        SELECT * FROM dbo.cat_tarea_arturo_prueba WHERE id = :id;
       `, {
         replacements: { id: taskId },
       });
@@ -82,30 +88,49 @@ export const getAllTasks = async (req, res) => {
    */
   export const updateTask = async (req, res) => {
     const taskId = req.params.id;
-    const updatedTaskData = extractTaskData(req.body);
+    console.log("/*/*/*/*/*/*/*/*/*");
+    console.log("Task ID:", taskId);
+    console.log("Task ID Type:", typeof taskId);
+    console.log(req.body);
+    console.log("/*/*/*/*/*/*/*/*/*");
+    const updatedTaskData = req.body /* extractTaskData(req.body); */
   
     try {
-      const place_id = 0;
+      const place_id = 1;
       const sequelize = getDatabaseInstance(place_id);
   
       // Execute query to update a specific task category by ID
       const [updatedTask, metadata] = await sequelize.query(`
-        UPDATE dbo.cat_tarea
+        UPDATE dbo.cat_tarea_arturo_prueba
         SET nombre = :name, activo = :active, id_proceso = :process_id
-        WHERE id = :id;
+        OUTPUT inserted.*
+        WHERE id_tarea = :id_tarea;
       `, {
-        replacements: { id: taskId, ...updatedTaskData },
+        replacements: { id_tarea: taskId, ...updatedTaskData },
       });
+
+    
+
+      if (updatedTask && updatedTask.length > 0) {
+        res.json({ message: 'Task updated successfully', updatedTask });
+      } else {
+        res.status(404).json({ message: 'Task not found or not updated' });
+      }
   
       // Check if the task was updated successfully
-      if (updatedTask && updatedTask.length > 0) {
+    /*   if (updatedTask && updatedTask.length > 0) {
         // Send a success response or additional data as needed
         res.json({ message: 'Task category updated successfully' });
       } else {
         res.status(404).json({ message: 'Task category not found' });
-      }
+      } */
+
+   
     } catch (error) {
       // Log the error and send a 500 status with a JSON response
+      console.error("/*/*/*/*/*/*/*/*/* After Query (Error) */");
+      console.error(req.body);
+      console.error("/*/*/*/*/*/*/*/*/*");
       console.error(error);
       res.status(500).json({ message: 'Failed to update task category' });
     }
@@ -121,14 +146,18 @@ export const getAllTasks = async (req, res) => {
    */
   export const deleteTask = async (req, res) => {
     const taskId = req.params.id;
-  
+    console.log("/*/*/*/*/*/*/*/*/*");
+
+    console.log(taskId);
+    console.log(req.body);
+    console.log("/*/*/*/*/*/*/*/*/*");
     try {
-      const place_id = 0;
+      const place_id = 1;
       const sequelize = getDatabaseInstance(place_id);
   
       // Execute query to delete a specific task category by ID
       const [deletedTask, metadata] = await sequelize.query(`
-        DELETE FROM dbo.cat_tarea WHERE id = :id;
+        DELETE FROM dbo.cat_tarea_arturo_prueba WHERE id = :id;
       `, {
         replacements: { id: taskId },
       });
@@ -159,14 +188,21 @@ export const createTask = async (req, res) => {
     try {
 
        // Validar los datos del cuerpo de la solicitud con el esquema
+      
+
+   
     const { error, value } = createTaskSchema.validate(req.body);
+    
+    
 
     if (error) {
       // Si hay errores de validación, responde con un error 400 y los detalles del error
+    
       return res.status(400).json({ message: 'Invalid request body', error: error.details });
     }
 
     const taskData = extractTaskData(value);
+   
 
     await insertTaskToDatabase(taskData);
   
@@ -187,23 +223,33 @@ export const createTask = async (req, res) => {
    * @throws {Error} - Throws an error if the insertion fails.
    */
   const insertTaskToDatabase = async (taskData) => {
-    const place_id = 0;
+    const place_id = 1;
     const sequelize = getDatabaseInstance(place_id);
   
     // Execute stored procedure or perform actions to create a new task category
-    const [taskCreated, metadata] = await sequelize.query(`
-      INSERT INTO dbo.cat_tarea (nombre, activo, id_proceso)
-      VALUES (:name, :active, :process_id);
-    `, {
-      replacements: taskData,
-    });
+    const [taskCreated] = await sequelize.query(`
+    INSERT INTO dbo.cat_tarea_arturo_prueba (nombre, activo, id_proceso)
+    VALUES (:nombre, :activo, :id_proceso);
+    SELECT SCOPE_IDENTITY() AS insertedId;
+  `, {
+    replacements: taskData,
+    type: sequelize.QueryTypes.SELECT,
+  });
+
   
-    // Check if the task was created successfully
-    if (!(taskCreated && taskCreated.length > 0)) {
-      // If the task creation was not successful, throw an error
-      throw new Error('Failed to create task category');
-    }
-  };
+
+    console.info(taskCreated)
+   
+  
+  
+     // Check if the task was created successfully
+  if (!taskCreated || taskCreated.length === 0 || !taskCreated.insertedId) {
+    // If the task creation was not successful, throw an error
+    throw new Error('Failed to create task category');
+  }
+  return taskCreated.insertedId;
+  
+  }
 
 
   
@@ -217,11 +263,44 @@ export const createTask = async (req, res) => {
  * @throws {Error} - Throws an error if the extraction fails or if required properties are missing.
  */
   const extractTaskData = (requestBody) => {
-    const { name, active, process_id } = requestBody;
+    
+    console.log("***********");
+    console.log(requestBody);
+    console.log("***********");
+
+    const { nombre, activo, id_proceso } = requestBody;
+ 
+    
+ 
   
-    if (!name || !active || !process_id) {
+    if (!nombre || !id_proceso || !activo) {
       throw new Error('Invalid request body. Missing required properties.');
     }
   
-    return { name, active, process_id };
+    return { nombre, activo, id_proceso };
   };
+
+
+  export const isTaskWithNameExists = async (req,res) => {
+    try {
+        const place_id = 1;
+        const sequelize = getDatabaseInstance(place_id);
+        const taskName = req.body.name
+        const [existingTask] = await sequelize.query(`
+            SELECT 1
+            FROM dbo.cat_tarea_arturo_prueba
+            WHERE nombre = :nombre;
+        `, {
+            replacements: { nombre: taskName },
+            type: sequelize.QueryTypes.SELECT,
+        });
+
+        
+
+        return existingTask && existingTask.lengnth > 0;
+    } catch (error) {
+        // Log the error
+        console.error(error);
+        throw new Error('Failed to check if task with the same name exists');
+    }
+};

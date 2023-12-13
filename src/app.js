@@ -50,6 +50,7 @@ import morgan from 'morgan'
 import authRoutes from './routes/auth.routes.js'
 import menuRoutes from './routes/menu.routes.js'
 import placeRoutes from './routes/place.routes.js'
+import taskRoutes from './routes/task.routes.js'
 import serviceRoutes from './routes/service.routes.js'
 import processRoutes from './routes/process.routes.js'
 import mapRoutes from './routes/map.routes.js'
@@ -73,6 +74,7 @@ app.use('/api', authRoutes)
 app.use('/api', menuRoutes)
 app.use('/api', placeRoutes)
 app.use('/api', accountHistoryRoutes)
+app.use('/api', taskRoutes)
 app.use('/api', serviceRoutes)
 app.use('/api', processRoutes)
 app.use('/api', mapRoutes)
