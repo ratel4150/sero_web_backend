@@ -170,7 +170,10 @@ export const updateService = async (req, res) => {
  * @returns {Promise<void>} A promise that resolves once the service is deleted.
  * @throws {Error} Throws an error if the deletion fails.
  */
-export const deleteService = async (serviceId) => {
+export const deleteService = async (req,res) => {
+
+  const serviceId = req.params.id;
+  console.log(serviceId);
   try {
     const place_id = 0;
     const sequelize = getDatabaseInstance(place_id);
@@ -191,7 +194,8 @@ export const deleteService = async (serviceId) => {
       throw new Error("Service not found");
     } */
   } catch (error) {
-    throw new Error("Failed to delete service");
+    console.log(error);
+  
   }
 };
 /**

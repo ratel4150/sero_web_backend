@@ -33,14 +33,15 @@ export const getPlaceServiceProcessByUserId = async (req, res) => {
  * @property {string} mobile_application_url - The mobile application URL.
  */
 const createProcessSchema = Joi.object({
-  name: Joi.string().required(),
-  image: Joi.string(),
-  active: Joi.boolean().required(),
-  stored_procedure_management: Joi.string(),
-  stored_procedure_management_graphic: Joi.string(),
-  management_table: Joi.string(),
-  mobile_application_url: Joi.string(),
+  nombre: Joi.string(),
+  imagen: Joi.string(),
+  activo: Joi.boolean(),
+  procedimiento_almacenado_gestion: Joi.string(),
+  procedimiento_almacenado_gestion_grafico: Joi.string(),
+  tabla_gestion: Joi.string(),
+  url_aplicacion_movil: Joi.string(),
   });
+
 
 /**
  * Retrieves all process categories from the database.
@@ -136,20 +137,31 @@ export const updateProcess = async (req, res) => {
         procedimiento_almacenado_gestion_grafico = :procedimiento_almacenado_gestion_grafico,
         tabla_gestion = :tabla_gestion,
         url_aplicacion_movil = :url_aplicacion_movil
-      WHERE id_proceso = :id;
+      WHERE id_proceso = :id ;
     `,
       {
         replacements: { id: processId, ...updatedProcessData },
       }
     );
 
+    
+  /* :nombre,
+      :imagen,
+      :activo,
+      :procedimiento_almacenado_gestion,
+      :procedimiento_almacenado_gestion_grafico,
+      :tabla_gestion,
+      :url_aplicacion_movil */
+
+    console.log(updatedProcess);
+    res.json({ message: "Process category updated successfully" });
     // Check if the process was updated successfully
-    if (updatedProcess && updatedProcess.length > 0) {
+   /*  if (updatedProcess && updatedProcess.length > 0) {
       // Send a success response or additional data as needed
-      res.json({ message: "Process category updated successfully" });
+     
     } else {
       res.status(404).json({ message: "Process category not found" });
-    }
+    } */
   } catch (error) {
     // Log the error and send a 500 status with a JSON response
     console.error(error);
@@ -284,26 +296,26 @@ export const insertProcessToDatabase = async (processData) => {
  */
 export const extractProcessData = (requestBody) => {
   const {
-    name,
-    image,
-    active,
-    stored_procedure_management,
-    stored_procedure_management_graphic,
-    management_table,
-    mobile_application_url,
+    nombre,
+    imagen,
+    activo,
+    procedimiento_almacenado_gestion,
+    procedimiento_almacenado_gestion_grafico,
+    tabla_gestion,
+    url_aplicacion_movil,
   } = requestBody;
 
-  if (!name || !image || !active || !stored_procedure_management || !stored_procedure_management_graphic || !management_table || !mobile_application_url) {
+ /*  if (!nombre || !imagen  || !procedimiento_almacenado_gestion || !procedimiento_almacenado_gestion_grafico || !tabla_gestion || !url_aplicacion_movil) {
     throw new Error("Invalid request body. Missing required properties.");
-  }
+  } */
 
   return {
-    name,
-    image,
-    active,
-    stored_procedure_management,
-    stored_procedure_management_graphic,
-    management_table,
-    mobile_application_url,
+    nombre,
+    imagen,
+    activo,
+    procedimiento_almacenado_gestion,
+    procedimiento_almacenado_gestion_grafico,
+    tabla_gestion,
+    url_aplicacion_movil,
   };
 };
