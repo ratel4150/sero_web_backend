@@ -7,7 +7,7 @@ import * as taskController from '../controllers/task.controller.js';
 
 const router = Router()
 // Ruta para obtener todas las tareas
-router.get('/tasks', taskController.getAllTasks);
+router.get('/services/:id', taskController.getAllTasks);
 
 // Ruta para obtener una tarea por su ID
 router.get('/tasks/:id', taskController.getTaskById);

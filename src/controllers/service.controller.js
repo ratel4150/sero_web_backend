@@ -15,13 +15,17 @@ import Joi from "joi";
  * @type {Joi.ObjectSchema<CreateServiceSchema>}
  */
 const createServiceSchema = Joi.object({
-  name: Joi.string().required(),
-  image: Joi.string(),
-  active: Joi.boolean().required(),
-  order: Joi.number().integer(),
-  mobile_app_icon: Joi.string(),
+  nombre: Joi.string(),
+  imagen: Joi.string(),
+  activo: Joi.boolean(),
+  orden: Joi.number().integer(),
+  icono_app_movil: Joi.string(),
 });
-
+/* nombre,
+    imagen,
+    activo,
+    orden,
+    icono_app_movil, */
 /* name,
     image,
     active,
@@ -60,18 +64,21 @@ export const getPlaceServiceByUserId = async (req, res) => {
  * @throws {Error} Throws an error if the retrieval fails.
  */
 
-export const getAllServices = async () => {
+export const getAllServices = async (req,res) => {
+  console.log("entrando la funcion");
   try {
     const place_id = 0;
     const sequelize = getDatabaseInstance(place_id);
+    console.log(sequelize);
 
     // Execute query to get all services
     const [services, metadata] = await sequelize.query(`
       SELECT * FROM dbo.servicio;
     `);
-
-    return services;
+  
+     res.json({services});
   } catch (error) {
+    console.log(error);
     throw new Error("Failed to retrieve services");
   }
 };
@@ -92,7 +99,7 @@ export const getServiceById = async (serviceId) => {
     const [service, metadata] = await sequelize.query(
       `
       SELECT [id_servicio], [nombre], [imagen], [activo], [orden], [fecha_ingreso], [icono_app_movil]
-      FROM [sero_central].[dbo].[servicio] WHERE [id_servicio] = :id;
+      FROM [sero_prueba].[dbo].[servicio] WHERE [id_servicio] = :id;
     `,
       {
         replacements: { id: serviceId },
@@ -113,7 +120,12 @@ export const getServiceById = async (serviceId) => {
  * @returns {Promise<void>} A promise that resolves once the service is updated.
  * @throws {Error} Throws an error if the update fails.
  */
-export const updateService = async (serviceId, updatedServiceData) => {
+export const updateService = async (req, res) => {
+  const serviceId = req.params.id_service;
+  const updatedServiceData = req.body
+  console.log("******");
+  console.log(updateService);
+  console.log("******");
   try {
     const place_id = 0;
     const sequelize = getDatabaseInstance(place_id);
@@ -121,20 +133,33 @@ export const updateService = async (serviceId, updatedServiceData) => {
     // Execute query to update a specific service by ID
     const [updatedService, metadata] = await sequelize.query(
       `
-      UPDATE [sero_central].[dbo].[servicio]
-      SET [nombre] = :name, [imagen] = :image, [activo] = :active, [orden] = :order, [fecha_ingreso] = :date, [icono_app_movil] = :icon
-      WHERE [id_servicio] = :id;
+      UPDATE [dbo].[servicio]
+      SET [nombre] = :nombre, [imagen] = :imagen, [activo] = :activo, [orden] = :orden, [fecha_ingreso] = :fecha_ingreso, [icono_app_movil] = :icono_app_movil
+      OUTPUT inserted.*
+      WHERE id_servicio = :id;
     `,
       {
         replacements: { id: serviceId, ...updatedServiceData },
       }
     );
-
-    if (!(updatedService && updatedService.length > 0)) {
-      throw new Error("Service not found");
+/* "id_servicio": 1,
+      "nombre": "Regularización agua",
+      "imagen": "imagen_no_disponible.jpg",
+      "activo": true,
+      "orden": 0,
+      "fecha_ingreso": "2021-12-09T22:23:31.730Z",
+      "icono_app_movil": "water" */
+        console.log(updatedService);
+    if (updatedService && updatedService.length > 0) {
+      res.json({ message: 'Service updated successfully', updatedService });
+    } else {
+      res.status(404).json({ message: 'Task not found or not updated' });
     }
   } catch (error) {
-    throw new Error("Failed to update service");
+ 
+   
+    console.error(error);
+    res.status(500).json({ message: 'Failed to update service' });
   }
 };
 /*
@@ -153,16 +178,18 @@ export const deleteService = async (serviceId) => {
     // Execute query to delete a specific service by ID
     const [deletedService, metadata] = await sequelize.query(
       `
-      DELETE FROM [sero_central].[dbo].[servicio] WHERE [id_servicio] = :id;
+      DELETE FROM [dbo].[servicio] WHERE [id_servicio] = :id;
     `,
       {
         replacements: { id: serviceId },
       }
     );
 
-    if (!(deletedService && deletedService.length > 0)) {
+    console.log(deletedService);
+
+/*     if (!(deletedService && deletedService.length > 0)) {
       throw new Error("Service not found");
-    }
+    } */
   } catch (error) {
     throw new Error("Failed to delete service");
   }
@@ -208,13 +235,16 @@ const insertServiceToDatabase = async (serviceData) => {
   // Execute stored procedure or perform actions to create a new service
   const [serviceCreated, metadata] = await sequelize.query(
     `
-    INSERT INTO [sero_central].[dbo].[servicio] (nombre, imagen, activo, orden, icono_app_movil)
-    VALUES (:nombre, :imagen, :activo, :orden, :icono_app_movil);
+    INSERT INTO [dbo].[servicio] (nombre, imagen, activo, orden, icono_app_movil)
+  VALUES (:nombre, :imagen, :activo, :orden, :icono_app_movil);
+  SELECT SCOPE_IDENTITY() AS newServiceId;
   `,
     {
       replacements: serviceData,
     }
   );
+
+  console.log(serviceCreated);
 
   // Check if the service was created successfully
   if (!(serviceCreated && serviceCreated.length > 0)) {
@@ -225,17 +255,17 @@ const insertServiceToDatabase = async (serviceData) => {
 
 // Define the function to extract service data from the request body
 const extractServiceData = (requestBody) => {
-  const { name, image, active, order, mobile_app_icon } = requestBody;
+  const { nombre, imagen, activo, orden, icono_app_movil } = requestBody;
 
-  if (!name || !image || !active || !order || !mobile_app_icon) {
+  if (!nombre || !imagen || !activo || !orden || !icono_app_movil) {
     throw new Error("Invalid request body. Missing required properties.");
   }
 
   return {
-    name,
-    image,
-    active,
-    order,
-    mobile_app_icon,
+    nombre,
+    imagen,
+    activo,
+    orden,
+    icono_app_movil,
   };
 };

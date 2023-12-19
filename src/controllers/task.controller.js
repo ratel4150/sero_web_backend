@@ -23,12 +23,12 @@ const createTaskSchema = Joi.object({
  */
 export const getAllTasks = async (req, res) => {
     try {
-      const place_id = 1;
+      const place_id = 0;
       const sequelize = getDatabaseInstance(place_id);
   
       // Execute query to get all task categories
       const [tasks, metadata] = await sequelize.query(`
-        SELECT * FROM dbo.cat_tarea_arturo_prueba;
+        SELECT * FROM dbo.cat_tarea;
       `);
 
     
@@ -54,12 +54,12 @@ export const getAllTasks = async (req, res) => {
     const taskId = req.params.id;
   
     try {
-      const place_id = 1;
+      const place_id = 0;
       const sequelize = getDatabaseInstance(place_id);
   
       // Execute query to get a specific task category by ID
       const [task, metadata] = await sequelize.query(`
-        SELECT * FROM dbo.cat_tarea_arturo_prueba WHERE id = :id;
+        SELECT * FROM dbo.cat_tarea WHERE id = :id;
       `, {
         replacements: { id: taskId },
       });
@@ -94,15 +94,16 @@ export const getAllTasks = async (req, res) => {
     console.log(req.body);
     console.log("/*/*/*/*/*/*/*/*/*");
     const updatedTaskData = req.body /* extractTaskData(req.body); */
+    console.log(updateTask);
   
     try {
-      const place_id = 1;
+      const place_id = 0;
       const sequelize = getDatabaseInstance(place_id);
   
       // Execute query to update a specific task category by ID
       const [updatedTask, metadata] = await sequelize.query(`
-        UPDATE dbo.cat_tarea_arturo_prueba
-        SET nombre = :name, activo = :active, id_proceso = :process_id
+        UPDATE dbo.cat_tarea
+        SET nombre = :nombre, activo = :activo, id_proceso = :id_proceso
         OUTPUT inserted.*
         WHERE id_tarea = :id_tarea;
       `, {
@@ -146,26 +147,38 @@ export const getAllTasks = async (req, res) => {
    */
   export const deleteTask = async (req, res) => {
     const taskId = req.params.id;
-    console.log("/*/*/*/*/*/*/*/*/*");
 
     console.log(taskId);
-    console.log(req.body);
-    console.log("/*/*/*/*/*/*/*/*/*");
+    
     try {
-      const place_id = 1;
+      const place_id = 0;
       const sequelize = getDatabaseInstance(place_id);
   
-      // Execute query to delete a specific task category by ID
-      const [deletedTask, metadata] = await sequelize.query(`
-        DELETE FROM dbo.cat_tarea_arturo_prueba WHERE id = :id;
+        // Execute query to get the task information before deleting
+        const [taskToDelete, taskMetadata] = await sequelize.query(`
+        SELECT * FROM dbo.cat_tarea WHERE id_tarea = :id;
       `, {
         replacements: { id: taskId },
       });
   
-      // Check if the task was deleted successfully
-      if (deletedTask && deletedTask.length > 0) {
-        // Send a success response or additional data as needed
-        res.json({ message: 'Task category deleted successfully' });
+      // Check if the task to delete was found
+      if (taskToDelete && taskToDelete.length > 0) {
+        // Execute query to delete the specific task category by ID
+        const [deletedTask, deleteMetadata] = await sequelize.query(`
+          DELETE FROM dbo.cat_tarea WHERE id_tarea = :id;
+        `, {
+          replacements: { id: taskId },
+        });
+    
+  
+        // Check if the task was deleted successfully
+       
+          // Send a success response with the deleted task data
+          res.json({
+            message: 'Task category deleted successfully',
+            deletedTask: taskToDelete[0], // Assuming you want the first record if multiple
+          });
+       
       } else {
         res.status(404).json({ message: 'Task category not found' });
       }
@@ -223,12 +236,12 @@ export const createTask = async (req, res) => {
    * @throws {Error} - Throws an error if the insertion fails.
    */
   const insertTaskToDatabase = async (taskData) => {
-    const place_id = 1;
+    const place_id = 0;
     const sequelize = getDatabaseInstance(place_id);
   
     // Execute stored procedure or perform actions to create a new task category
     const [taskCreated] = await sequelize.query(`
-    INSERT INTO dbo.cat_tarea_arturo_prueba (nombre, activo, id_proceso)
+    INSERT INTO dbo.cat_tarea (nombre, activo, id_proceso)
     VALUES (:nombre, :activo, :id_proceso);
     SELECT SCOPE_IDENTITY() AS insertedId;
   `, {
@@ -283,12 +296,12 @@ export const createTask = async (req, res) => {
 
   export const isTaskWithNameExists = async (req,res) => {
     try {
-        const place_id = 1;
+        const place_id = 0;
         const sequelize = getDatabaseInstance(place_id);
         const taskName = req.body.name
         const [existingTask] = await sequelize.query(`
             SELECT 1
-            FROM dbo.cat_tarea_arturo_prueba
+            FROM dbo.cat_tarea
             WHERE nombre = :nombre;
         `, {
             replacements: { nombre: taskName },
