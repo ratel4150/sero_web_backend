@@ -279,11 +279,11 @@ export const insertProcessToDatabase = async (processData) => {
     }
   );
 
-  // Check if the process was created successfully
+  /* // Check if the process was created successfully
   if (!(processCreated && processCreated.length > 0)) {
     // If the process creation was not successful, throw an error
     throw new Error("Failed to create process category");
-  }
+  } */
 };
 
 // Helper function to extract process data

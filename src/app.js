@@ -56,6 +56,7 @@ import processRoutes from './routes/process.routes.js'
 import mapRoutes from './routes/map.routes.js'
 import assignmentRoutes from './routes/assignment.routes.js'
 import accountHistoryRoutes from './routes/accounthistory.routes.js'
+import rolRoutes from './routes/roles.routes.js'
 import cookieParser from 'cookie-parser';
 import cors from 'cors'
 
@@ -79,5 +80,6 @@ app.use('/api', serviceRoutes)
 app.use('/api', processRoutes)
 app.use('/api', mapRoutes)
 app.use('/api', assignmentRoutes)
+app.use('/api', rolRoutes)
 
 export default app

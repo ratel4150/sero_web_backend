@@ -261,9 +261,9 @@ const insertServiceToDatabase = async (serviceData) => {
 const extractServiceData = (requestBody) => {
   const { nombre, imagen, activo, orden, icono_app_movil } = requestBody;
 
-  if (!nombre || !imagen || !activo || !orden || !icono_app_movil) {
+ /*  if (!nombre || !imagen || !activo || !orden || !icono_app_movil) {
     throw new Error("Invalid request body. Missing required properties.");
-  }
+  } */
 
   return {
     nombre,
